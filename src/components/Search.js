@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 const Search = () => {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState("Crime and Punishment");
+  const [results, setResults] = useState([]);
+  console.log(results);
 
   const searchHandler = (event) => {
     setSearchTerm(event.target.value);
@@ -10,7 +12,7 @@ const Search = () => {
 
   useEffect(() => {
     const search = async () => {
-      await axios.get("https://en.wikipedia.org/w/api.php", {
+      const { data } = await axios.get("https://en.wikipedia.org/w/api.php", {
         params: {
           action: "query",
           list: "search",
@@ -19,10 +21,48 @@ const Search = () => {
           srsearch: searchTerm,
         },
       });
+
+      setResults(data.query.search);
     };
 
-    search();
+    //to avoid a delay from the first search
+    // if there is no search...
+    if (searchTerm && !results.length) {
+      search();
+    } else {
+      // set timeout for API request after user input
+      const timeoutId = setTimeout(() => {
+        if (searchTerm) {
+          search();
+        }
+      }, 500);
+
+      // cleanout function
+      // React will hold this function in the first render, and return it after further rerenders
+      return () => {
+        clearTimeout(timeoutId);
+      };
+    }
   }, [searchTerm]);
+
+  const renderedResult = results.map((result) => {
+    return (
+      <div key={result.pageid}>
+        <ul>
+          <li>
+            <div>{result.title}</div>
+
+            {/* wikipedia API is returning a text with html
+            using feature bellow to transform the string returend into an html element */}
+            <span dangerouslySetInnerHTML={{ __html: result.snippet }}></span>
+            <div>
+              <a href={`https://en.wikipedia.org?curid=${result.pageid}`}>Go</a>
+            </div>
+          </li>
+        </ul>
+      </div>
+    );
+  });
 
   return (
     <div>
@@ -32,6 +72,7 @@ const Search = () => {
       <div>
         <input onChange={searchHandler} />
       </div>
+      <div>{renderedResult}</div>
     </div>
   );
 };
