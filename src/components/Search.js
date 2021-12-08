@@ -1,10 +1,20 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
+import Box from "@mui/material/Box";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import Divider from "@mui/material/Divider";
+import InboxIcon from "@mui/icons-material/Inbox";
+import TextField from "@mui/material/TextField";
+
 const Search = () => {
   const [searchTerm, setSearchTerm] = useState("Crime and Punishment");
   const [results, setResults] = useState([]);
-  console.log(results);
+  // console.log(results);
 
   const searchHandler = (event) => {
     setSearchTerm(event.target.value);
@@ -47,33 +57,43 @@ const Search = () => {
 
   const renderedResult = results.map((result) => {
     return (
-      <div key={result.pageid}>
-        <ul>
-          <li>
-            <div>{result.title}</div>
-
-            {/* wikipedia API is returning a text with html
+      <Box sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}>
+        <div key={result.pageid}>
+          <List>
+            <ListItem alignItems="flex-start">
+              <ListItemText
+                primary={result.title}
+                secondary={
+                  <React.Fragment>
+                    {/* wikipedia API is returning a text with html
             using feature bellow to transform the string returend into an html element */}
-            <span dangerouslySetInnerHTML={{ __html: result.snippet }}></span>
-            <div>
-              <a href={`https://en.wikipedia.org?curid=${result.pageid}`}>Go</a>
-            </div>
-          </li>
-        </ul>
-      </div>
+                    <span
+                      dangerouslySetInnerHTML={{ __html: result.snippet }}
+                    ></span>
+                    <div>
+                      <a
+                        href={`https://en.wikipedia.org?curid=${result.pageid}`}
+                      >
+                        Go
+                      </a>
+                    </div>
+                  </React.Fragment>
+                }
+              />
+            </ListItem>
+          </List>
+        </div>
+      </Box>
     );
   });
 
   return (
-    <div>
-      <div>
-        <label>Enter search term: </label>
-      </div>
-      <div>
+    <Box>
+      <TextField id="outlined-basic" label="Enter search term">
         <input onChange={searchHandler} />
-      </div>
+      </TextField>
       <div>{renderedResult}</div>
-    </div>
+    </Box>
   );
 };
 
